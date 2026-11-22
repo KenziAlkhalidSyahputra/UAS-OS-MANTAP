@@ -7,11 +7,11 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$ROOT_DIR/logs"
-LOG_FILE="$LOG_DIR/sysbackup.log"
+LOG_FILE="$LOG_DIR/systembackup.log"
 mkdir -p "$LOG_DIR"
 
-SERVICE_CONTAINER="${SERVICE_CONTAINER:-sysbackup-demo-service}"
-BACKUP_CONTAINER="${BACKUP_CONTAINER:-sysbackup-backup-server}"
+SERVICE_CONTAINER="${SERVICE_CONTAINER:-systembackup-demo-service}"
+BACKUP_CONTAINER="${BACKUP_CONTAINER:-systembackup-backup-server}"
 MIN_FREE_MB="${MIN_FREE_MB:-100}"
 SSH_HOST="${SSH_HOST:-127.0.0.1}"
 SSH_PORT="${SSH_PORT:-2222}"
