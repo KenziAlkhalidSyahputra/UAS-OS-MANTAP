@@ -112,11 +112,11 @@ File
  misaki-07 (Rakha), Container dan network:  
 `docker-compose.yml`, `.gitignore`, `backup-server/Dockerfile`
 
- Pr4mbors (Prama),  Akses aman (SSH) dan fondasi: 
+ Diandra_Farrel,  Akses aman (SSH) dan fondasi: 
 `backup-server/entrypoint.sh`, `scripts/common.sh`, `scripts/setup-demo.sh`
 
  KenziAlkhalidSyahputra,  Monitoring, backup, restore  
 `scripts/monitor.sh`, `scripts/backup.sh`, `scripts/restore.sh` 
 
- Diandra_Farrel,  Pengujian, cleanup, dokumentasi  
+ Pr4mbors (Prama),  Pengujian, cleanup, dokumentasi  
 `scripts/cleanup.sh`, `scripts/test.sh`, `README.md` |
