@@ -1,0 +1,2 @@
+[2026-11-22T02:47:21Z] RESTORE_OK: arsip backup-20261122T024720Z.tar.gz diverifikasi dan isi sama dengan data asli
+/home/prama12345/UAS-OS-MANTAP/restore-output/data-simulasi

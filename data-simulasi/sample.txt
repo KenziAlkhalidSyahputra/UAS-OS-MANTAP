@@ -1,0 +1,2 @@
+data simulasi Sistem Operasi
+baris kedua untuk verifikasi backup dan restore

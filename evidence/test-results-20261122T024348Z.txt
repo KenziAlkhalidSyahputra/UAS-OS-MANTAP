@@ -1,0 +1,206 @@
+=== SysBackup Monitor - hasil pengujian ===
+waktu     : 2026-11-22T02:43:49Z
+commit    : f4d7d95
+docker    : Docker version 29.9.3, build 5457199
+evidence  : /home/prama12345/UAS-OS-MANTAP/evidence/test-results-20261122T024348Z.txt
+
+##### A. MONITORING
+
+--- A1 monitor: layanan sehat -> OK
+    perintah: /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh
+    exit=0 (diharapkan: 0)
+    | [2026-11-22T02:43:59Z] service=systembackup-demo-service status=running health=healthy backup_server=running free_mb=976256
+    | [2026-11-22T02:43:59Z] MONITOR_OK: layanan sehat dan storage mencukupi
+    HASIL: PASS
+
+--- A2 monitor: statistik CPU/memori container
+    perintah: /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh --stats
+    exit=0 (diharapkan: 0)
+    | [2026-11-22T02:44:01Z] service=systembackup-demo-service status=running health=healthy backup_server=running free_mb=976256
+    | [2026-11-22T02:44:04Z] STATS: container=systembackup-demo-service cpu=1.15% mem=1.629MiB / 128MiB mem_pct=1.27%
+    | [2026-11-22T02:44:04Z] STATS: container=systembackup-backup-server cpu=0.00% mem=1.297MiB / 128MiB mem_pct=1.01%
+    | [2026-11-22T02:44:04Z] MONITOR_OK: layanan sehat dan storage mencukupi
+    HASIL: PASS
+
+--- A3 monitor: storage kurang -> GAGAL (exit 1)
+    perintah: env MIN_FREE_MB=999999999 /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh
+    exit=1 (diharapkan: 1)
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 1: Bad substitution
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 1: source: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 27: is_container_name: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 27: usage_error: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 28: is_uint: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 28: usage_error: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 30: need_cmd: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 33: container_status: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 34: container_health: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 35: container_status: not found
+    | df: '': No such file or directory
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 37: is_uint: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 37: fail: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 39: log: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 50: log: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 54: log: not found
+    | /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh: 57: [: Illegal number: 
+    HASIL: PASS
+
+--- A4 monitor: input tidak valid -> ditolak (exit 2)
+    perintah: /home/prama12345/UAS-OS-MANTAP/scripts/monitor.sh nama;rusak
+    exit=2 (diharapkan: 2)
+    | [2026-11-22T02:44:05Z] ERROR(input): Nama container tidak valid: nama;rusak
+    HASIL: PASS
+
+##### B. BACKUP + INTEGRASI MONITORING
+
+--- B1 integrasi: service mati -> backup DITOLAK, lalu recovery
+    perintah: t_backup_rejected
+    exit=0 (diharapkan: 0)
+    | [2026-11-22T02:44:08Z] service=systembackup-demo-service status=exited health=unhealthy backup_server=running free_mb=976256
+    | [2026-11-22T02:44:08Z] MONITOR_FAIL: layanan tidak berjalan sehat
+    | [2026-11-22T02:44:08Z] ERROR: Backup ditolak karena monitoring gagal
+    | backup ditolak (exit=1), tidak ada arsip baru (0 -> 0), service pulih healthy
+    HASIL: PASS
+
+--- B2 integrasi: service sehat -> backup BERHASIL + terkirim ke server
+    perintah: t_backup_success
+    exit=0 (diharapkan: 0)
+    | [2026-11-22T02:44:16Z] service=systembackup-demo-service status=running health=healthy backup_server=running free_mb=976256
+    | [2026-11-22T02:44:16Z] MONITOR_OK: layanan sehat dan storage mencukupi
+    | [2026-11-22T02:44:16Z] BACKUP: arsip lokal dibuat backup-20261122T024416Z.tar.gz
+    | [2026-11-22T02:44:17Z] BACKUP_OK: /home/prama12345/UAS-OS-MANTAP/backup-local/backup-20261122T024416Z.tar.gz dikirim ke backup-server dan checksum terverifikasi
+    | /home/prama12345/UAS-OS-MANTAP/backup-local/backup-20261122T024416Z.tar.gz
+    | arsip lokal dan salinan di backup-server identik: backup-20261122T024416Z.tar.gz
+    HASIL: PASS
+
+##### C. RESTORE
+
+--- C1 restore: arsip valid -> terverifikasi
+    perintah: /home/prama12345/UAS-OS-MANTAP/scripts/restore.sh
+    exit=0 (diharapkan: 0)
+    | [2026-11-22T02:44:17Z] RESTORE_OK: arsip backup-20261122T024416Z.tar.gz diverifikasi dan isi sama dengan data asli
+    | /home/prama12345/UAS-OS-MANTAP/restore-output/data-simulasi
+    HASIL: PASS
+
+--- C2 restore: arsip berubah -> DITOLAK (checksum)
+    perintah: t_restore_corrupt
+    exit=0 (diharapkan: 0)
+    | sha256sum: WARNING: 1 computed checksum did NOT match
+    | [2026-11-22T02:44:17Z] ERROR: Verifikasi checksum arsip gagal
+    | restore menolak arsip yang berubah (exit=1)
+    HASIL: PASS
+
+--- C3 restore: arsip tidak ada -> ditolak (exit 2)
+    perintah: /home/prama12345/UAS-OS-MANTAP/scripts/restore.sh /tmp/backup-20000101T000000Z.tar.gz
+    exit=2 (diharapkan: 2)
+    | [2026-11-22T02:44:17Z] ERROR(input): Arsip backup tidak ditemukan: /tmp/backup-20000101T000000Z.tar.gz
+    HASIL: PASS
+
+##### D. AKSES AMAN (SSH/SCP)
+
+--- D1 akses diizinkan: login dengan key milik proyek
+    perintah: remote_ssh echo login-ok
+    exit=0 (diharapkan: 0)
+    | login-ok
+    HASIL: PASS
+
+--- D2 akses ditolak: login password
+    perintah: expect_denied ssh -p 2222 -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o PubkeyAuthentication=no -o PreferredAuthentications=password backupuser@127.0.0.1 true
+    exit=0 (diharapkan: 0)
+    | backupuser@127.0.0.1: Permission denied (publickey).
+    HASIL: PASS
+
+--- D3 akses ditolak: key yang tidak terdaftar
+    perintah: t_wrong_key
+    exit=0 (diharapkan: 0)
+    | backupuser@127.0.0.1: Permission denied (publickey).
+    HASIL: PASS
+
+--- D4 akses ditolak: login sebagai root
+    perintah: expect_denied ssh -p 2222 -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -i /home/prama12345/UAS-OS-MANTAP/config/ssh/id_ed25519 -o IdentitiesOnly=yes root@127.0.0.1 true
+    exit=0 (diharapkan: 0)
+    | root@127.0.0.1: Permission denied (publickey).
+    HASIL: PASS
+
+--- D5 permission private key dan folder config/ssh
+    perintah: t_key_perms
+    exit=0 (diharapkan: 0)
+    | private key mode=600 (harus 600/400), config/ssh mode=700 (harus 700)
+    HASIL: PASS
+
+--- D6 ownership/permission .ssh di backup-server
+    perintah: t_remote_perms
+    exit=0 (diharapkan: 0)
+    | /home/backupuser/.ssh di backup-server: backupuser:700 (harus backupuser:700)
+    HASIL: PASS
+
+--- D7 ownership/permission authorized_keys di server
+    perintah: t_authkeys_perms
+    exit=0 (diharapkan: 0)
+    | authorized_keys di backup-server: backupuser:600 (harus backupuser:600)
+    HASIL: PASS
+
+##### E. CONTAINER, NETWORK, RESOURCE LIMIT, PERSISTENSI
+
+--- E1 resource limit CPU/memori + statistik
+    perintah: t_limits
+    exit=0 (diharapkan: 0)
+    | systembackup-demo-service memory=134217728B (harus 134217728) nano_cpus=250000000 (harus 250000000)
+    | systembackup-backup-server memory=134217728B (harus 134217728) nano_cpus=250000000 (harus 250000000)
+    | stats: systembackup-demo-service cpu=0.00% mem=1.281MiB / 128MiB (1.00%)
+    | stats: systembackup-backup-server cpu=0.00% mem=3.848MiB / 128MiB (3.01%)
+    HASIL: PASS
+
+--- E2 container tidak privileged, tanpa docker.sock
+    perintah: t_not_privileged
+    exit=0 (diharapkan: 0)
+    | systembackup-demo-service privileged=false mounts: /home/prama12345/UAS-OS-MANTAP/data-simulasi /var/lib/docker/volumes/uas-os-mantap_service-status/_data 
+    | systembackup-backup-server privileged=false mounts: /home/prama12345/UAS-OS-MANTAP/config/ssh/authorized_keys /home/prama12345/UAS-OS-MANTAP/backup-remote 
+    HASIL: PASS
+
+--- E3 network bersama + resolusi nama antar container
+    perintah: t_network
+    exit=0 (diharapkan: 0)
+    | network systembackup-demo-service: uas-os-mantap_sysbackup-net 
+    | network systembackup-backup-server: uas-os-mantap_sysbackup-net 
+    | PING backup-server (172.19.0.3): 56 data bytes
+    | 64 bytes from 172.19.0.3: seq=0 ttl=64 time=3.691 ms
+    | 
+    | --- backup-server ping statistics ---
+    | 1 packets transmitted, 1 packets received, 0% packet loss
+    | round-trip min/avg/max = 3.691/3.691/3.691 ms
+    HASIL: PASS
+
+--- E4 persistensi: data tetap ada setelah container dibuat ulang
+    perintah: t_persistence
+    exit=0 (diharapkan: 0)
+    | isi backup-remote/ sebelum container dibuat ulang:
+    | backup-20261122T024416Z.tar.gz
+    | backup-20261122T024416Z.tar.gz.sha256
+    | container lama: 7f834340666d  container baru: 0b7b66aaf275
+    | isi /home/backupuser/incoming di container baru:
+    | backup-20261122T024416Z.tar.gz
+    | backup-20261122T024416Z.tar.gz.sha256
+    HASIL: PASS
+
+=== RINGKASAN ===
+PASS  A1 monitor: layanan sehat -> OK
+PASS  A2 monitor: statistik CPU/memori container
+PASS  A3 monitor: storage kurang -> GAGAL (exit 1)
+PASS  A4 monitor: input tidak valid -> ditolak (exit 2)
+PASS  B1 integrasi: service mati -> backup DITOLAK, lalu recovery
+PASS  B2 integrasi: service sehat -> backup BERHASIL + terkirim ke server
+PASS  C1 restore: arsip valid -> terverifikasi
+PASS  C2 restore: arsip berubah -> DITOLAK (checksum)
+PASS  C3 restore: arsip tidak ada -> ditolak (exit 2)
+PASS  D1 akses diizinkan: login dengan key milik proyek
+PASS  D2 akses ditolak: login password
+PASS  D3 akses ditolak: key yang tidak terdaftar
+PASS  D4 akses ditolak: login sebagai root
+PASS  D5 permission private key dan folder config/ssh
+PASS  D6 ownership/permission .ssh di backup-server
+PASS  D7 ownership/permission authorized_keys di server
+PASS  E1 resource limit CPU/memori + statistik
+PASS  E2 container tidak privileged, tanpa docker.sock
+PASS  E3 network bersama + resolusi nama antar container
+PASS  E4 persistensi: data tetap ada setelah container dibuat ulang
+PASS=20 FAIL=0

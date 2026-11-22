@@ -1,0 +1,2 @@
+/systembackup-demo-service mem=134217728 cpus=250000000
+/systembackup-backup-server mem=134217728 cpus=250000000

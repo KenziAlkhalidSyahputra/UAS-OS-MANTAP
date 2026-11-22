@@ -1,0 +1,5 @@
+[2026-11-22T02:47:20Z] service=systembackup-demo-service status=running health=healthy backup_server=running free_mb=976255
+[2026-11-22T02:47:20Z] MONITOR_OK: layanan sehat dan storage mencukupi
+[2026-11-22T02:47:20Z] BACKUP: arsip lokal dibuat backup-20261122T024720Z.tar.gz
+[2026-11-22T02:47:21Z] BACKUP_OK: /home/prama12345/UAS-OS-MANTAP/backup-local/backup-20261122T024720Z.tar.gz dikirim ke backup-server dan checksum terverifikasi
+/home/prama12345/UAS-OS-MANTAP/backup-local/backup-20261122T024720Z.tar.gz
