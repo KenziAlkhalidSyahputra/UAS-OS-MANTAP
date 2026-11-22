@@ -1,0 +1,4 @@
+ Container systembackup-demo-service Stopping 
+ Container systembackup-backup-server Stopping 
+ Container systembackup-backup-server Stopped 
+ Container systembackup-demo-service Stopped 
